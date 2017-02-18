@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const sourcePath = path.join(__dirname, './client');
 const staticsPath = path.join(__dirname, './static');
@@ -46,12 +47,13 @@ module.exports = function (env) {
     );
   } else {
     plugins.push(
-      new webpack.HotModuleReplacementPlugin()
+      new webpack.HotModuleReplacementPlugin(),
+      new ExtractTextPlugin('styles.css')
     );
   }
 
   return {
-    devtool: isProd ? 'source-map' : 'eval',
+    devtool: !isProd ? 'source-map' : 'eval',
     context: sourcePath,
     entry: {
       js: './index.js',
@@ -74,12 +76,37 @@ module.exports = function (env) {
           },
         },
         {
-          test: /\.css$/,
-          exclude: /node_modules/,
-          use: [
-            'style-loader',
-            'css-loader'
-          ]
+          test: /(\.css|\.scss)$/,
+          use: ExtractTextPlugin.extract({
+            fallback: 'style-loader',
+            use: [
+              {
+                loader: 'css-loader',
+                options: {
+                  sourceMap: true,
+                  modules: true,
+                  importLoaders: true,
+                  localIdentName: '[name]__[local]___[hash:base64:5]'
+                }
+              },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  plugins: function () {
+                    return [
+                      require('autoprefixer')
+                    ];
+                  }
+                }
+              },
+              {
+                loader: 'sass-loader',
+                options: {
+                  sourceMap: true
+                }
+              }
+            ]
+          })
         },
         {
           test: /\.(js|jsx)$/,

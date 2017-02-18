@@ -1,0 +1,10 @@
+body {
+  /* background: red; */
+  /* color: #fff; */
+}
+
+.ok {
+  background: red;
+  color:  #fff;
+  display: flex;
+}
